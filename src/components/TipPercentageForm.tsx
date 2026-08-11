@@ -1,6 +1,11 @@
 import type {Dispatch, SetStateAction} from "react";
 const tipOptions = [
   {
+    id: "tip-0",
+    value: 0,
+    label: "Sin propina",
+  },
+  {
     id: "tip-10",
     value: 0.1,
     label: "10%",
@@ -18,26 +23,28 @@ const tipOptions = [
 ];
 type TipPercentageFormPropsT = {
   setTip: Dispatch<SetStateAction<number>>;
+  tip: number;
 };
-const TipPercentageForm = ({setTip}: TipPercentageFormPropsT) => {
+const TipPercentageForm = ({setTip, tip}: TipPercentageFormPropsT) => {
   return (
     <div>
       <h3 className="font-bold text-2xl mb-3">Propina:</h3>
 
       <form action="">
-        {tipOptions.map((tip) => {
+        {tipOptions.map((option) => {
           return (
             <div
-              key={tip.id}
-              className="flex items-center gap-2 max-w-14 justify-between
+              key={option.id}
+              className="flex items-center gap-2 max-w-26 justify-between
             "
             >
-              <label htmlFor={tip.id}>{tip.label}</label>
+              <label htmlFor={option.id}>{option.label}</label>
               <input
                 type="radio"
                 name="tip"
-                id={tip.id}
-                value={tip.value}
+                id={option.id}
+                value={option.value}
+                checked={tip === option.value}
                 onChange={(e) => setTip(+e.target.value)}
               />
             </div>

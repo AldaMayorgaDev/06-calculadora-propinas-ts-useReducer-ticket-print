@@ -37,7 +37,7 @@ function App() {
             incrementQuantity={incrementQuantity}
             decrementQuantity={decrementQuantity}
           />
-          <TipPercentageForm setTip={setTip} />
+          <TipPercentageForm setTip={setTip} tip={tip} />
           <OrderTotals order={order} tip={tip} reloadOrder={reloadOrder} />
         </div>
       </main>

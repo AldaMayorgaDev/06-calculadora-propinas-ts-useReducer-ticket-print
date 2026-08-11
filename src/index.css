@@ -21,4 +21,18 @@
   .btn-quantity {
     @apply p-1 rounded-full bg-teal-400 w-5 h-5 flex items-center justify-center text-white hover:bg-teal-500 hover:text-white hover:cursor-pointer;
   }
+  .print-container {
+    @apply absolute -left-[9999px] top-0;
+  }
+}
+
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+  }
 }

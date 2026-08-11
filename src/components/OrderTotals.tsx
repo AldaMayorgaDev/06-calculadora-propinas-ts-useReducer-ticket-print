@@ -1,4 +1,6 @@
-import {useMemo} from "react";
+import {useMemo, useRef} from "react";
+import {useReactToPrint} from "react-to-print";
+import {Ticket} from "./ticket/Ticket";
 import {formatCurrency} from "../helpers";
 import type {OrderItemT} from "../types";
 
@@ -22,6 +24,12 @@ export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
     () => subTotalAmount + tipAmount,
     [subTotalAmount, tipAmount],
   );
+  const ticketRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: ticketRef,
+    documentTitle: "ticket-orden",
+  });
+
   return (
     <>
       <div className="space-y-3">
@@ -65,8 +73,9 @@ export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
         </button>
 
         <button
-          className="flex justify-evenly items-center bg-teal-400 p-4 rounded-lg text-white font-bold"
+          className="flex justify-evenly items-center bg-teal-400 p-4 rounded-lg text-white font-bold disabled:bg-teal-400/30 hover:cursor-pointer disabled:hover:cursor-not-allowed"
           disabled={order.length === 0}
+          onClick={handlePrint}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -85,6 +94,12 @@ export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
 
           <p>Imprimir Ticket</p>
         </button>
+
+        <div className="print-container">
+          <div ref={ticketRef}>
+            <Ticket order={order} tip={tip} />
+          </div>
+        </div>
       </div>
     </>
   );
