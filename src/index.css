@@ -1,0 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Hand:wght@400..700&display=swap");
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: "Edu VIC WA NT Hand", cursive;
+  }
+}
+
+@layer components {
+  .card-product {
+    @apply border-2 border-teal-400 w-full rounded-md flex justify-between p-2 hover:bg-teal-400 hover:text-white hover:border-teal-500 hover:cursor-pointer;
+  }
+  .alert-danger {
+    @apply text-red-800 bg-red-100 rounded-md text-center max-w-sm py-2 mx-auto;
+  }
+  .btn-trash {
+    @apply bg-red-600 text-white rounded-full h-8 w-8 font-bold uppercase hover:cursor-pointer hover:bg-red-700 flex justify-center items-center;
+  }
+
+  .btn-quantity {
+    @apply p-1 rounded-full bg-teal-400 w-5 h-5 flex items-center justify-center text-white hover:bg-teal-500 hover:text-white hover:cursor-pointer;
+  }
+}
