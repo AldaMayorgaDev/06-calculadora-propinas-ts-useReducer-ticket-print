@@ -1,16 +1,18 @@
+import type {ActionDispatch} from "react";
 import type {MenuItemT} from "../../types";
+import type {OrderActionsT} from "../../reducers/order-reducer";
 
 type ButtonTrashPropsT = {
-  deleteItem: (id: MenuItemT["id"]) => void;
+  dispatch: ActionDispatch<[OrderActionsT]>;
   id: MenuItemT["id"];
 };
 
-const ButtonTrash = ({deleteItem, id}: ButtonTrashPropsT) => {
+const ButtonTrash = ({dispatch, id}: ButtonTrashPropsT) => {
   return (
     <button
       className="btn-trash "
       onClick={() => {
-        deleteItem(id);
+        dispatch({type: "delete-item", payload: {id: id}});
       }}
     >
       <svg

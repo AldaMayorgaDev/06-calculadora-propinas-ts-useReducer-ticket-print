@@ -1,21 +1,27 @@
 import {useMemo} from "react";
 import {formatCurrency} from "../../helpers";
-import type {OrderItemT} from "../../types";
 import dataStore from "../../data/dataStore";
+import type {OrderStateT} from "../../reducers/order-reducer";
 
 type TicketPropsT = {
-  order: OrderItemT[];
-  tip: number;
+  state: OrderStateT;
 };
 
-export const Ticket = ({order, tip}: TicketPropsT) => {
+export const Ticket = ({state}: TicketPropsT) => {
   const {business, sale, customer, footer} = dataStore;
   const subTotalAmount = useMemo(
-    () => order.reduce((total, item) => total + item.price * item.quantity, 0),
-    [order],
+    () =>
+      state.order.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      ),
+    [state.order],
   );
 
-  const tipAmount = useMemo(() => subTotalAmount * tip, [subTotalAmount, tip]);
+  const tipAmount = useMemo(
+    () => subTotalAmount * state.tip,
+    [subTotalAmount, state.tip],
+  );
 
   const totalAmount = useMemo(
     () => subTotalAmount + tipAmount,
@@ -66,7 +72,7 @@ export const Ticket = ({order, tip}: TicketPropsT) => {
 
       {/* Productos */}
       <div className="space-y-1.5 mb-1">
-        {order.map((item) => (
+        {state.order.map((item) => (
           <div key={item.id} className="flex justify-between gap-2">
             <span className="flex-1">
               <span className="font-semibold">{item.quantity}x</span>{" "}

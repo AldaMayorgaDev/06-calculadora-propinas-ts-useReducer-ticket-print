@@ -1,24 +1,26 @@
-import {useMemo, useRef} from "react";
+import {useMemo, useRef, type ActionDispatch} from "react";
 import {useReactToPrint} from "react-to-print";
 import {Ticket} from "./ticket/Ticket";
 import {formatCurrency} from "../helpers";
-import type {OrderItemT} from "../types";
+import type {OrderActionsT, OrderStateT} from "../reducers/order-reducer";
 
 type OrderTotalsPropsT = {
-  order: OrderItemT[];
-  tip: number;
-  reloadOrder: () => void;
+  state: OrderStateT;
+  dispatch: ActionDispatch<[OrderActionsT]>;
 };
-export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
+export const OrderTotals = ({state, dispatch}: OrderTotalsPropsT) => {
   const subTotalAmount = useMemo(
     () =>
-      order.reduce((total, item) => {
+      state.order.reduce((total, item) => {
         return total + item.price * item.quantity;
       }, 0),
-    [order],
+    [state.order],
   );
 
-  const tipAmount = useMemo(() => subTotalAmount * tip, [tip, subTotalAmount]);
+  const tipAmount = useMemo(
+    () => subTotalAmount * state.tip,
+    [state.tip, subTotalAmount],
+  );
 
   const totalAmount = useMemo(
     () => subTotalAmount + tipAmount,
@@ -51,9 +53,9 @@ export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
         <button
           className="flex justify-evenly items-center bg-gray-500 p-4 rounded-lg text-white font-bold hover:bg-gray-600 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-500"
           onClick={() => {
-            reloadOrder();
+            dispatch({type: "reload-order"});
           }}
-          disabled={order.length === 0}
+          disabled={state.order.length === 0}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -74,7 +76,7 @@ export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
 
         <button
           className="flex justify-evenly items-center bg-teal-400 p-4 rounded-lg text-white font-bold disabled:bg-teal-400/30 hover:cursor-pointer disabled:hover:cursor-not-allowed"
-          disabled={order.length === 0}
+          disabled={state.order.length === 0}
           onClick={handlePrint}
         >
           <svg
@@ -97,7 +99,7 @@ export const OrderTotals = ({order, tip, reloadOrder}: OrderTotalsPropsT) => {
 
         <div className="print-container">
           <div ref={ticketRef}>
-            <Ticket order={order} tip={tip} />
+            <Ticket state={state} />
           </div>
         </div>
       </div>

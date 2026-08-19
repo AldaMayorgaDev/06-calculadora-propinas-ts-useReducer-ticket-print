@@ -1,18 +1,17 @@
-import type {OrderItemT, MenuItemT} from "../../types";
+import type {ActionDispatch} from "react";
+import type {OrderItemT} from "../../types";
+import type {OrderActionsT} from "../../reducers/order-reducer";
 
 type ButtonDecrementPropsT = {
-  decrementQuantity: (id: MenuItemT["id"]) => void;
+  dispatch: ActionDispatch<[OrderActionsT]>;
   orderItem: OrderItemT;
 };
-const ButtonDecrement = ({
-  decrementQuantity,
-  orderItem,
-}: ButtonDecrementPropsT) => {
+const ButtonDecrement = ({dispatch, orderItem}: ButtonDecrementPropsT) => {
   return (
     <button
       className="btn-quantity mx-4"
       onClick={() => {
-        decrementQuantity(orderItem.id);
+        dispatch({type: "decrement-quantity", payload: {id: orderItem.id}});
       }}
     >
       <svg
