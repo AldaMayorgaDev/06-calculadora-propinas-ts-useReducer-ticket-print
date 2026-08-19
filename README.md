@@ -1,70 +1,234 @@
 <div align="center">
 
-# 🧾 Calculadora de Propinas y consumo + Impresión de Ticket de compra
+# 🧾 Calculadora de Propinas + Ticket de Compra con useReducer
 
-Aplicación web para calcular propinas, generar el ticket de una venta y prepararlo para impresión en papel térmico (58mm/80mm) directamente desde el navegador.
+Aplicación web desarrollada con **React + TypeScript** para administrar una orden de consumo, calcular propinas y generar un ticket listo para imprimir en papel térmico desde el navegador.
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![ESLint](https://img.shields.io/badge/ESLint-9-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
+[![ESLint](https://img.shields.io/badge/ESLint-10-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
 
-[Ver repositorio](https://github.com/AldaMayorgaDev/03-Calculadora-Propinas-Ticket-Print.git)
+[Ver repositorio](https://github.com/AldaMayorgaDev/06-calculadora-propinas-ts-useReducer-ticket-print)
 
 </div>
 
 ## 📋 Descripción
 
-**Restaurant Ticket & Tip App** es una aplicación desarrollada con **React, TypeScript, Vite y Tailwind CSS** que permite seleccionar un porcentaje de propina sobre el total de una orden y generar un ticket de venta listo para imprimirse en una impresora térmica.
+Este proyecto simula el flujo básico de una orden en un restaurante o punto de venta. El usuario puede agregar productos del menú, modificar cantidades, eliminar productos, seleccionar un porcentaje de propina y consultar automáticamente el subtotal, la propina y el total a pagar.
 
-El proyecto separa los datos del negocio (`dataStore`), los tipos de la orden, los cálculos de totales y la presentación del ticket en módulos independientes, de forma que sea sencillo reemplazar los datos de ejemplo por información real proveniente de un sistema de punto de venta.
+La aplicación también genera un **ticket de compra de 58 mm** y utiliza `react-to-print` para abrir el flujo de impresión del navegador.
+
+En esta versión, el manejo del estado fue refactorizado para utilizar **`useReducer`**. La lógica que anteriormente estaba concentrada en el custom hook `useOrder` fue migrada a `src/reducers/order-reducer.ts`, donde ahora se encuentran el estado inicial, las acciones disponibles y las reglas para actualizar la orden.
+
+La orden se persiste en `localStorage`, por lo que los productos permanecen disponibles después de recargar la página.
 
 > [!IMPORTANT]
-> Por seguridad, una aplicación web no puede seleccionar una impresora ni confirmar la impresión automáticamente. El proyecto abre el cuadro de impresión mediante `window.print()` y el usuario debe elegir la impresora y confirmar el proceso.
+> Por restricciones de seguridad del navegador, la aplicación puede abrir el cuadro de impresión, pero no puede seleccionar una impresora ni confirmar la impresión automáticamente. El usuario debe realizar esos pasos manualmente.
 
 ## ✨ Funcionalidades principales
 
-| Funcionalidad                    | Descripción                                                                                                 |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Selector de propina**          | Formulario de radio buttons controlado (`0%`, `10%`, `20%`, `50%`) con una opción seleccionada por defecto. |
-| **Cálculo automático**           | Calcula subtotal, monto de propina y total a partir de los productos de la orden mediante `useMemo`.        |
-| **Ticket de venta**              | Muestra negocio, folio, fecha, cajero(a), cliente, productos, subtotal, propina y total.                    |
-| **Formato mexicano**             | Presenta importes en pesos mexicanos (`Intl.NumberFormat`) y fechas con la configuración regional `es-MX`.  |
-| **Impresión desde el navegador** | Abre la interfaz de impresión del sistema mediante `window.print()` / `react-to-print`.                     |
-| **Vista exclusiva de impresión** | Oculta todo lo que no sea el ticket (botones, formulario de propina, layout) al imprimir.                   |
-| **Papel térmico**                | Estilos preparados para tickets de `58mm`, con `@page { size: 58mm auto; margin: 0 }`.                      |
-| **Datos tipados**                | Define la estructura de la orden (`OrderItemT`) y del negocio (`DataStoreT`) con TypeScript.                |
-| **Componentes reutilizables**    | Separa el formulario de propina y el ticket en componentes independientes y desacoplados.                   |
+| Funcionalidad             | Descripción                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------- |
+| **Agregar productos**     | Añade productos del menú a la orden mediante la acción `add-item`.                      |
+| **Acumular cantidades**   | Si el producto ya existe, aumenta automáticamente su cantidad.                          |
+| **Incrementar cantidad**  | Permite aumentar unidades mediante `increment-quantity`.                                |
+| **Disminuir cantidad**    | Reduce unidades mediante `decrement-quantity`; si llega a cero, el producto se elimina. |
+| **Eliminar productos**    | Elimina completamente un producto mediante `delete-item`.                               |
+| **Seleccionar propina**   | Permite elegir `0%`, `10%`, `20%` o `50%` mediante la acción `add-tip`.                 |
+| **Cálculo automático**    | Calcula subtotal, propina y total utilizando `reduce()` y `useMemo`.                    |
+| **Reiniciar orden**       | Limpia los productos y reinicia la propina mediante `reload-order`.                     |
+| **Persistencia local**    | Guarda automáticamente la orden en `localStorage` mediante `useEffect`.                 |
+| **Ticket de compra**      | Genera un ticket con negocio, folio, fecha, cliente, productos y totales.               |
+| **Impresión térmica**     | Utiliza `react-to-print` y estilos preparados para papel de `58mm`.                     |
+| **Formato mexicano**      | Presenta moneda en MXN con `Intl.NumberFormat` y fecha con configuración `es-MX`.       |
+| **Tipado con TypeScript** | Tipado del estado, acciones, productos, orden, props y datos del negocio.               |
 
 ## 🧠 Conceptos aplicados
 
-Este proyecto sirve como ejemplo práctico de:
+Este proyecto permite practicar de forma conjunta:
 
-- Componentes funcionales controlados con React (`useState`, `checked`, `onChange`).
-- Tipado de props y estructuras de datos con TypeScript.
-- Renderizado de listas mediante `map()`.
-- Cálculo de valores derivados con `reduce()` y memoización con `useMemo`.
-- Separación de responsabilidades entre componentes, datos, tipos y helpers.
-- Formateo de moneda con `Intl.NumberFormat` y de fechas con `toLocaleString`.
-- Estilizado con Tailwind CSS, incluyendo utilidades de impresión (`print:`, `hidden`).
-- Uso de `window.print()` / `react-to-print` para abrir el cuadro de impresión.
-- Aplicación de reglas CSS específicas mediante `@media print` y `@page`.
+- `useReducer` para manejar estado con múltiples transiciones relacionadas.
+- Patrón **state + action + reducer + dispatch**.
+- Discriminated unions de TypeScript para tipar las acciones del reducer.
+- Estado compuesto mediante `OrderStateT`.
+- Persistencia de información con `localStorage`.
+- Sincronización de efectos secundarios con `useEffect`.
+- Valores derivados utilizando `reduce()` y `useMemo`.
+- Comunicación entre componentes mediante props y `dispatch`.
+- Renderizado de listas con `map()`.
+- Componentes reutilizables para las acciones de la orden.
+- Formateo de moneda con `Intl.NumberFormat`.
+- Generación de tickets para impresión mediante `react-to-print`.
+- Estilos responsivos y de impresión con Tailwind CSS.
+- Tipado estático con TypeScript.
+
+## 🔄 Migración de `useOrder` a `useReducer`
+
+Anteriormente, la lógica relacionada con la orden se encontraba dentro del custom hook:
+
+```text
+src/hooks/useOrder.ts
+```
+
+En esta versión, esa responsabilidad se trasladó al reducer:
+
+```text
+src/reducers/order-reducer.ts
+```
+
+El hook `useOrder.ts` se conserva únicamente como referencia de la migración y ya no administra el estado de la aplicación.
+
+### Antes
+
+La lógica de la orden estaba encapsulada dentro de un custom hook que exponía el estado y diferentes funciones para modificarlo.
+
+### Ahora
+
+`App.tsx` utiliza:
+
+```ts
+const [state, dispatch] = useReducer(orderReducer, initialState);
+```
+
+Los componentes reciben `state` y/o `dispatch` y envían acciones al reducer:
+
+```ts
+dispatch({
+  type: "add-item",
+  payload: {item},
+});
+```
+
+El reducer recibe el estado actual y la acción, y genera el siguiente estado:
+
+```text
+Componente
+    │
+    │ dispatch(action)
+    ▼
+orderReducer(state, action)
+    │
+    │ nuevo estado
+    ▼
+React vuelve a renderizar la interfaz
+```
+
+Esto centraliza las reglas de actualización de la orden y hace más explícito qué acciones pueden modificar el estado.
+
+## 🧩 Estado administrado por el reducer
+
+El estado global de la orden se encuentra tipado de la siguiente manera:
+
+```ts
+export type OrderStateT = {
+  order: OrderItemT[];
+  tip: number;
+};
+```
+
+Su estado inicial es:
+
+```ts
+export const initialState: OrderStateT = {
+  order: initialOrder(),
+  tip: 0,
+};
+```
+
+`initialOrder()` consulta `localStorage` para recuperar una orden almacenada previamente. Si no existe información guardada, la aplicación inicia con una orden vacía.
+
+> [!NOTE]
+> Actualmente se persiste únicamente `order`. El porcentaje de propina vuelve a `0` al iniciar nuevamente la aplicación.
+
+## 🎯 Acciones disponibles
+
+Las acciones están definidas mediante una unión discriminada de TypeScript:
+
+```ts
+export type OrderActionsT =
+  | {type: "add-item"; payload: {item: MenuItemT}}
+  | {type: "delete-item"; payload: {id: MenuItemT["id"]}}
+  | {type: "increment-quantity"; payload: {id: MenuItemT["id"]}}
+  | {type: "decrement-quantity"; payload: {id: MenuItemT["id"]}}
+  | {type: "reload-order"}
+  | {type: "add-tip"; payload: {value: number}};
+```
+
+| Acción               | Responsabilidad                                                                |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `add-item`           | Agrega un producto o incrementa su cantidad si ya existe.                      |
+| `delete-item`        | Elimina un producto de la orden.                                               |
+| `increment-quantity` | Aumenta en una unidad la cantidad de un producto.                              |
+| `decrement-quantity` | Disminuye la cantidad y elimina el producto cuando queda debajo de una unidad. |
+| `reload-order`       | Vacía la orden y reinicia la propina.                                          |
+| `add-tip`            | Actualiza el porcentaje de propina seleccionado.                               |
+
+## 💾 Persistencia con localStorage
+
+La orden se guarda automáticamente cada vez que cambia `state.order`:
+
+```ts
+useEffect(() => {
+  localStorage.setItem("order", JSON.stringify(state.order));
+}, [state.order]);
+```
+
+Al iniciar la aplicación, el reducer intenta recuperar esos datos:
+
+```ts
+const initialOrder = (): OrderItemT[] => {
+  const localStorageOrder = localStorage.getItem("order");
+
+  return localStorageOrder ? JSON.parse(localStorageOrder) : [];
+};
+```
+
+El flujo de persistencia es:
+
+```text
+Usuario modifica la orden
+        ↓
+dispatch(action)
+        ↓
+orderReducer actualiza state.order
+        ↓
+useEffect detecta el cambio
+        ↓
+localStorage guarda la orden
+```
 
 ## 🧱 Estructura del proyecto
 
 ```text
-restaurant-ticket-tip-app/
+06-calculadora-propinas-ts-useReducer-ticket-print/
 ├── public/
+│   ├── favicon.svg
+│   ├── icons.svg
 │   └── logo.png
 ├── src/
 │   ├── components/
-│   │   ├── Ticket.tsx
+│   │   ├── ticket/
+│   │   │   └── Ticket.tsx
+│   │   ├── utils/
+│   │   │   ├── ButtonDecrement.tsx
+│   │   │   ├── ButtonIcrement.tsx
+│   │   │   └── ButtonTrash.tsx
+│   │   ├── Header.tsx
+│   │   ├── MenuItem.tsx
+│   │   ├── OrderContents.tsx
+│   │   ├── OrderTotals.tsx
 │   │   └── TipPercentageForm.tsx
 │   ├── data/
-│   │   └── dataStore.ts
+│   │   ├── dataStore.ts
+│   │   └── db.ts
 │   ├── helpers/
-│   │   └── formatCurrency.ts
+│   │   └── index.ts
+│   ├── hooks/
+│   │   └── useOrder.ts
+│   ├── reducers/
+│   │   └── order-reducer.ts
 │   ├── types/
 │   │   └── index.ts
 │   ├── App.tsx
@@ -82,34 +246,42 @@ restaurant-ticket-tip-app/
 
 ## 🧩 Responsabilidad de cada módulo
 
-| Archivo                                | Responsabilidad                                                                                 |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `src/data/dataStore.ts`                | Contiene los datos de ejemplo del negocio, la venta y el pie del ticket.                        |
-| `src/types/index.ts`                   | Define los tipos `DataStoreT` y `OrderItemT` utilizados por los componentes.                    |
-| `src/components/TipPercentageForm.tsx` | Formulario controlado de radio buttons para seleccionar el porcentaje de propina.               |
-| `src/components/Ticket.tsx`            | Construye y muestra la estructura visual completa del ticket, lista para imprimir.              |
-| `src/helpers/formatCurrency.ts`        | Formatea cantidades como pesos mexicanos.                                                       |
-| `src/index.css`                        | Contiene las reglas de Tailwind y las reglas especiales de impresión (`@page`, `@media print`). |
-| `src/App.tsx`                          | Integra el estado de la orden, la propina, el formulario y el ticket.                           |
+| Archivo                                | Responsabilidad                                                                                                 |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `src/reducers/order-reducer.ts`        | Define `OrderStateT`, `OrderActionsT`, el estado inicial y toda la lógica para modificar la orden y la propina. |
+| `src/hooks/useOrder.ts`                | Archivo conservado como referencia de la migración; la lógica fue trasladada al reducer.                        |
+| `src/App.tsx`                          | Inicializa `useReducer`, persiste la orden con `useEffect` y distribuye `state` y `dispatch`.                   |
+| `src/data/db.ts`                       | Contiene los productos disponibles en el menú.                                                                  |
+| `src/data/dataStore.ts`                | Contiene los datos del negocio, venta, cliente y pie del ticket.                                                |
+| `src/types/index.ts`                   | Define `MenuItemT`, `OrderItemT` y `DataStoreT`.                                                                |
+| `src/components/MenuItem.tsx`          | Renderiza un producto del menú y despacha `add-item`.                                                           |
+| `src/components/OrderContents.tsx`     | Renderiza los productos agregados y permite incrementar, disminuir o eliminarlos.                               |
+| `src/components/TipPercentageForm.tsx` | Renderiza las opciones de propina y despacha `add-tip`.                                                         |
+| `src/components/OrderTotals.tsx`       | Calcula subtotal, propina y total; reinicia la orden y controla la impresión.                                   |
+| `src/components/ticket/Ticket.tsx`     | Construye el ticket térmico que será enviado a impresión.                                                       |
+| `src/components/utils/*`               | Botones reutilizables para modificar cantidades o eliminar productos.                                           |
+| `src/helpers/index.ts`                 | Contiene `formatCurrency()` para mostrar cantidades en MXN.                                                     |
+| `src/index.css`                        | Configura Tailwind CSS, estilos reutilizables y reglas para impresión térmica.                                  |
 
 ## 🛠️ Tecnologías utilizadas
 
-- **React 19** — Construcción de la interfaz mediante componentes.
-- **TypeScript** — Tipado estático de datos, props y funciones.
-- **Vite** — Entorno de desarrollo y generación del build.
-- **Tailwind CSS** — Estilizado de la interfaz y del ticket, incluyendo estilos de impresión.
-- **react-to-print** _(opcional)_ — Manejo simplificado de la impresión de un componente específico.
-- **ESLint** — Análisis estático y validación de calidad del código.
+- **React 19** — Construcción de la interfaz mediante componentes funcionales.
+- **TypeScript 6** — Tipado estático del estado, acciones, componentes y datos.
+- **Vite 8** — Entorno de desarrollo y generación del build de producción.
+- **Tailwind CSS 4** — Diseño responsivo y estilos de la aplicación.
+- **react-to-print** — Impresión del componente `Ticket` desde el navegador.
+- **ESLint 10** — Análisis estático del código.
+- **localStorage** — Persistencia local de la orden.
 
 ## ✅ Requisitos previos
 
-Antes de ejecutar el proyecto, instala:
+Necesitas tener instalado:
 
-- **Node.js `20.19.0` o superior**, o **Node.js `22.12.0` o superior**.
-- **npm**, incluido normalmente con Node.js.
+- Node.js compatible con Vite 8.
+- npm.
 - Un navegador moderno como Chrome, Edge, Firefox o Safari.
 
-Puedes comprobar las versiones instaladas con:
+Puedes comprobar tus versiones con:
 
 ```bash
 node --version
@@ -121,29 +293,31 @@ npm --version
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/AldaMayorgaDev/03-Calculadora-Propinas-Ticket-Print.git
-cd 03-Calculadora-Propinas-Ticket-Print
+git clone https://github.com/AldaMayorgaDev/06-calculadora-propinas-ts-useReducer-ticket-print.git
+cd 06-calculadora-propinas-ts-useReducer-ticket-print
 ```
 
-### 2. Instalar las dependencias
+### 2. Instalar dependencias
 
 ```bash
 npm install
 ```
 
-También puedes realizar una instalación reproducible usando el archivo `package-lock.json`:
+También puedes utilizar:
 
 ```bash
 npm ci
 ```
 
-### 3. Ejecutar el proyecto en desarrollo
+para realizar una instalación basada en `package-lock.json`.
+
+### 3. Ejecutar el servidor de desarrollo
 
 ```bash
 npm run dev
 ```
 
-Vite mostrará en la terminal la dirección local de la aplicación, normalmente:
+Vite mostrará una URL local similar a:
 
 ```text
 http://localhost:5173
@@ -154,8 +328,6 @@ http://localhost:5173
 ```bash
 npm run build
 ```
-
-El resultado se guardará en la carpeta `dist/`.
 
 ### 5. Previsualizar el build
 
@@ -171,63 +343,48 @@ npm run lint
 
 ## 📜 Scripts disponibles
 
-| Comando           | Descripción                                        |
-| ----------------- | -------------------------------------------------- |
-| `npm run dev`     | Inicia el servidor de desarrollo de Vite.          |
-| `npm run build`   | Valida TypeScript y genera el build de producción. |
-| `npm run preview` | Ejecuta localmente una vista previa del build.     |
-| `npm run lint`    | Analiza los archivos del proyecto con ESLint.      |
+| Comando           | Descripción                                         |
+| ----------------- | --------------------------------------------------- |
+| `npm run dev`     | Inicia el servidor de desarrollo de Vite.           |
+| `npm run build`   | Ejecuta TypeScript y genera el build de producción. |
+| `npm run preview` | Previsualiza localmente el build generado.          |
+| `npm run lint`    | Ejecuta ESLint sobre el proyecto.                   |
 
-## 🧾 Personalización
+## 🍽️ Modificar los productos del menú
 
-### Modificar los datos del negocio y la venta
-
-La información mostrada se encuentra en:
+Los productos se encuentran en:
 
 ```text
-src/data/dataStore.ts
+src/data/db.ts
 ```
 
-Puedes personalizar:
+Cada producto implementa el tipo `MenuItemT`:
 
-- Nombre, dirección, teléfono y RFC del negocio.
-- Logotipo.
-- Folio y cajero(a) de la venta.
-- Cliente.
-- Mensaje de agradecimiento y política de devoluciones.
+```ts
+export type MenuItemT = {
+  id: number;
+  name: string;
+  price: number;
+};
+```
 
 Ejemplo:
 
 ```ts
-const dataStore: DataStoreT = {
-  business: {
-    name: "Tienda La Esquina",
-    address: "Av. Agustín de Iturbide, Col. Centro, San Nicolás, Nuevo León.",
-    phone: "55 1234 5678",
-    taxId: "TIE850101ABC",
-    logoUrl: "/logo.png",
-  },
-  sale: {
-    folio: "A-000452",
-    cashier: "María López",
-  },
-  customer: {
-    name: "Cliente Mostrador",
-  },
-  footer: {
-    thankYouMessage: "¡Gracias por tu compra!",
-    returnPolicy:
-      "Si requiere factura, solicitarla dentro de los primeros 5 días con este ticket.",
-  },
-};
+{
+  id: 1,
+  name: "Pizza a la Leña Chica",
+  price: 30,
+}
 ```
 
-> [!NOTE]
-> En Vite, los archivos colocados dentro de `public/` se referencian desde la raíz. Por ejemplo, `public/logo.png` se utiliza como `/logo.png`.
+## 💰 Modificar las opciones de propina
 
-### Modificar las opciones de propina
+Las opciones se encuentran en:
 
-Las opciones del formulario se definen en `TipPercentageForm.tsx`:
+```text
+src/components/TipPercentageForm.tsx
+```
 
 ```ts
 const tipOptions = [
@@ -238,81 +395,168 @@ const tipOptions = [
 ];
 ```
 
-El componente es **controlado**: recibe `tip` y `setTip` desde `App.tsx`, y cada radio se marca comparando `tip === option.value`, por lo que siempre hay una opción seleccionada de forma predecible.
+Cuando el usuario cambia la selección se despacha:
 
-### Cambiar el tamaño del papel
+```ts
+dispatch({
+  type: "add-tip",
+  payload: {value: +e.target.value},
+});
+```
 
-El ticket está preparado para papel térmico de **58mm**. Para adaptarlo a **80mm**, ajusta el ancho del contenedor en `Ticket.tsx` (`w-[58mm]` → `w-[80mm]`) y la regla `@page` en `src/index.css`:
+## 🏪 Personalizar el ticket
+
+Los datos del negocio y de la venta se encuentran en:
+
+```text
+src/data/dataStore.ts
+```
+
+Desde este archivo puedes modificar:
+
+- Nombre del negocio.
+- Dirección.
+- Teléfono.
+- RFC.
+- Logotipo.
+- Folio de venta.
+- Cajero(a).
+- Cliente.
+- Mensaje de agradecimiento.
+- Política o mensaje final.
+
+Los archivos colocados dentro de `public/` se consumen desde la raíz de la aplicación. Por ejemplo:
+
+```ts
+logoUrl: "/logo.png";
+```
+
+## 🧮 Cálculo de importes
+
+Los importes se obtienen a partir del estado de la orden:
+
+```text
+subtotal = Σ (precio × cantidad)
+propina  = subtotal × porcentaje de propina
+total    = subtotal + propina
+```
+
+Los cálculos derivados utilizan `useMemo` para recalcularse cuando cambian sus dependencias.
+
+## 🖨️ Impresión del ticket
+
+`OrderTotals.tsx` crea una referencia al ticket:
+
+```ts
+const ticketRef = useRef<HTMLDivElement>(null);
+```
+
+Después configura `react-to-print`:
+
+```ts
+const handlePrint = useReactToPrint({
+  contentRef: ticketRef,
+  documentTitle: "ticket-orden",
+});
+```
+
+Al presionar **Imprimir Ticket**, `react-to-print` prepara el contenido referenciado y abre el flujo de impresión del navegador.
+
+El ticket está diseñado con un ancho de:
+
+```text
+58mm
+```
+
+Además, `src/index.css` contiene:
 
 ```css
 @media print {
   @page {
-    size: 58mm auto; /* cambia a 80mm auto si usas ese formato */
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  body {
     margin: 0;
   }
 }
 ```
 
-## 🖨️ Cómo imprimir el ticket
+Para utilizar papel de **80 mm**, puedes ajustar el ancho de `Ticket.tsx` y la regla `@page`.
 
-1. Ejecuta la aplicación.
-2. Selecciona el porcentaje de propina.
-3. Presiona el botón **Imprimir ticket**.
-4. Selecciona la impresora térmica en el cuadro de impresión.
-5. Verifica el tamaño del papel y los márgenes.
-6. Desactiva encabezados y pies de página del navegador cuando sea necesario.
-7. Confirma manualmente la impresión.
-
-Durante la impresión, las reglas CSS:
-
-- Ocultan los elementos que no pertenecen al ticket (`visibility: hidden` en `body *`).
-- Muestran únicamente el contenedor `.ticket` y su contenido.
-- Posicionan el ticket en la parte superior izquierda de la hoja.
-- Configuran la página para papel térmico de 58mm sin márgenes.
-
-## 🧮 Cálculo de importes
-
-Los totales se calculan de la siguiente forma:
+## 🏗️ Flujo general de la aplicación
 
 ```text
-subtotal = suma de (cantidad × precio unitario) de cada producto de la orden
-propina  = subtotal × porcentaje seleccionado
-total    = subtotal + propina
+                 ┌──────────────┐
+                 │   App.tsx    │
+                 │  useReducer  │
+                 └──────┬───────┘
+                        │
+                 state + dispatch
+                        │
+       ┌────────────────┼─────────────────┐
+       ▼                ▼                 ▼
+   MenuItem       OrderContents   TipPercentageForm
+       │                │                 │
+       └────────────────┼─────────────────┘
+                        │
+                  dispatch(action)
+                        │
+                        ▼
+              ┌──────────────────┐
+              │   orderReducer   │
+              └────────┬─────────┘
+                       │
+                  nuevo state
+                       │
+          ┌────────────┴────────────┐
+          ▼                         ▼
+   localStorage               OrderTotals
+                                  │
+                                  ▼
+                               Ticket
+                                  │
+                                  ▼
+                            react-to-print
 ```
-
-La lógica está memoizada con `useMemo` dentro de `Ticket.tsx`, por lo que los cálculos solo se repiten cuando cambia la orden o el porcentaje de propina.
 
 ## ⚠️ Alcance del proyecto
 
-Este proyecto es una demostración frontend y no incluye:
+Este proyecto tiene fines educativos y de práctica frontend. Actualmente no incluye:
 
-- Base de datos ni persistencia de ventas.
 - Backend o API.
-- Inicio de sesión o control de usuarios.
+- Base de datos.
+- Persistencia de ventas en servidor.
+- Sistema de autenticación.
+- Administración de usuarios.
 - Comunicación directa con hardware de impresión.
-- Impresión silenciosa sin confirmación del usuario.
-- Generación o validación de CFDI.
-- Integración con los servicios del SAT.
+- Impresión silenciosa sin intervención del usuario.
+- Generación de CFDI.
+- Integración con servicios del SAT.
 
 ## 🗺️ Posibles mejoras
 
-- Obtener la información de la orden desde una API o sistema de punto de venta.
-- Permitir capturar productos desde un formulario en lugar de datos fijos.
-- Incorporar un selector visual entre papel de 58mm y 80mm.
+- Eliminar definitivamente el archivo legacy `useOrder.ts` después de completar la migración.
+- Extraer el acceso a `localStorage` a una función reutilizable.
+- Persistir también el porcentaje de propina.
+- Implementar una API para productos y órdenes.
 - Guardar ventas en una base de datos.
-- Agregar un código QR de verificación al final del ticket.
-- Crear pruebas unitarias para helpers y componentes.
-- Añadir distintos diseños o plantillas de ticket.
-- Implementar una aplicación de escritorio para impresión directa mediante Electron o Tauri.
+- Añadir pruebas unitarias para el reducer.
+- Añadir pruebas para las acciones de incrementar, disminuir, eliminar y reiniciar.
+- Implementar Context API junto con `useReducer` para evitar pasar `dispatch` por múltiples props si la aplicación crece.
+- Permitir elegir entre tickets de 58 mm y 80 mm.
+- Agregar un código QR al ticket.
+- Crear diferentes plantillas de impresión.
 
 ## 📌 Estado del proyecto
 
-Proyecto funcional con fines educativos, creado para practicar la construcción de componentes controlados, el tipado con TypeScript, el cálculo de datos derivados y la impresión de contenido desde una aplicación React.
+Proyecto funcional con fines educativos, enfocado en practicar la evolución del manejo de estado en React desde un **custom hook** hacia una arquitectura basada en **`useReducer`**, manteniendo TypeScript, persistencia con `localStorage` y generación de tickets imprimibles.
 
 ## 📄 Licencia
 
-Actualmente, este repositorio no incluye un archivo de licencia. Antes de reutilizarlo o distribuirlo en otros proyectos, se recomienda agregar una licencia explícita, por ejemplo **MIT**.
+Actualmente el repositorio no incluye un archivo de licencia. Si planeas reutilizar o distribuir el proyecto, puedes agregar una licencia como **MIT**.
 
 ## 👨‍💻 Autor
 
-Desarrollado por [@AldaMayorgaDev](https://github.com/AldaMayorgaDev).
+Desarrollado con 🖤 por [@AldaMayorgaDev](https://github.com/AldaMayorgaDev).
